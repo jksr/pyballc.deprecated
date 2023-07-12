@@ -1,0 +1,3 @@
+[submodule "ballcools"]
+	path = ballcools
+	url = https://github.com/jksr/ballcools
