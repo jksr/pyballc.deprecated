@@ -1,5 +1,5 @@
 # pyballc
-Pyballc is a python module to reading/manipulating BAllC files. It is based on the [BAllCools](https://github.com/jksr/ballcools).
+Pyballc is a python module to read/manipulate BAllC files. It is based on the [BAllCools](https://github.com/jksr/ballcools).
 
 _Currently only reading and querying operations are supported, but more is comming:wink:_
 
