@@ -5,6 +5,13 @@ class BAllCFile:
     def __init__(self, ballc_file, cmeta_file=None):
         self.bci = pyballcools.BAllCIndex(ballc_file)
         self.tbi = pysam.TabixFile(cmeta_file) if cmeta_file is not None else None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
     def _fetch_with_cmeta(self, chrom, start, end):
         mciter = self.bci.QueryMcRecords_Iter(chrom, start, end)
         if mciter.HasNext():
@@ -20,6 +27,7 @@ class BAllCFile:
             *_, strand, context = cline.split()
 
             yield(rec.chrom,rec.pos,strand, context, rec.mc,rec.cov, )
+
     def _fetch(self, chrom, start, end):
         mciter = self.bci.QueryMcRecords_Iter(chrom, start, end)
         if mciter.HasNext():
