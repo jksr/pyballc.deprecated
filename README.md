@@ -19,7 +19,12 @@ _Currently only reading and querying operations are supported, but more is commi
 ### Installation
 pyballc is a stand alone package. You don't need to install BAllCools separately.
 
-To install, run
+**Installing from pypi**
+```bash
+pip install pyballc
+```
+
+**Installing from github**
 ```bash
 git clone https://jksr@github.com/jksr/pyballc
 cd pyballc
@@ -27,6 +32,8 @@ git submodule init
 git submodule update 
 pip install .
 ```
+
+
 
 ### Usage
 see ```test``` for examples
