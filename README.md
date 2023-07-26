@@ -1,4 +1,8 @@
 # pyballc
+
+[![PyPI version](https://badge.fury.io/py/pyballc.svg)](https://badge.fury.io/py/pyballc)
+
+
 Pyballc is a python module to read/manipulate BAllC files. It is based on the [BAllCools](https://github.com/jksr/ballcools).
 
 _Currently only reading and querying operations are supported, but more is comming:wink:_
