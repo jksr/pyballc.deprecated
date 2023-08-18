@@ -60,5 +60,10 @@ setup(
     install_requires=[  
         'pysam',
     ],
+
+    entry_points={
+        'console_scripts': ['pyballc=pyballc.pyballc:main',
+                            ],
+    }
 )
 

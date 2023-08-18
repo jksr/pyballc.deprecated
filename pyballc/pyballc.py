@@ -4,6 +4,7 @@ import pyballcools
 #pip install pytabix
 # import tabix #
 import pysam
+import fire
 
 class BAllCFile:
     def __init__(self, ballc_file, cmeta_file=None):
@@ -53,7 +54,7 @@ class BAllCFile:
                 *_, strand, context = record
                 yield(rec.chrom,rec.pos,strand, context, rec.mc,rec.cov, )
             except:
-                print(f"No meta data found for {rec.chrom}:{rec.pos-1}-{rec.pos}")
+                print(f"No meta data found for {rec.chrom}:{rec.pos-1}-{rec.pos}",end="\r")
 
     def _fetch(self, chrom, start, end):
         if chrom=="*":
@@ -158,6 +159,11 @@ def AllcToBallC(allc_path,ballc_path,chrom_size_path,
     IndexBallc(ballc_path)
     return ballc_path
 
+def ExtractCMeta(fasta_path=None,cmeta_path=None):
+    pyballcools.ExtractCMeta(fasta_path, cmeta_path)
+    pyballcools.IndexCMeta(cmeta_path)
+    return cmeta_path
+
 def test():
     ballc_file = '/anvil/scratch/x-wding2/Projects/pyballc/test.ballc'
     cmeta_file = '/anvil/scratch/x-wding2/Projects/pyballc/h1930001.cmeta.gz'
@@ -186,5 +192,9 @@ def test():
         print(x)
         break
 
+def main():
+    fire.core.Display = lambda lines, out: print(*lines, file=out)
+    fire.Fire()
+
 if __name__=="__main__":
-    pass
+    main()
