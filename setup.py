@@ -58,7 +58,12 @@ setup(
         'pyballc': ['_pyballcools.so'],
     },
     install_requires=[  
-        'pysam',
+        'pysam',"fire"
     ],
-)
 
+    entry_points={
+        'console_scripts': [
+                                    'pyballc=pyballc.pyballc:main',
+                            ],
+    }
+)

@@ -1,1 +1,1 @@
-from .pyballc import BAllCFile
+from .pyballc import *
