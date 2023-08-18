@@ -113,7 +113,7 @@ class BAllCFile:
         f.close()
         return allc_path
 
-def BAllC2AllC(ballc_path,cmeta_path,allc_path):
+def Ballc2Allc(ballc_path=None,cmeta_path=None,allc_path=None):
     """
     Convert ballc file into allc path.
 
@@ -137,7 +137,7 @@ def BAllC2AllC(ballc_path,cmeta_path,allc_path):
 def IndexBallc(ballc_path):
     IndexBallc(ballc_path)
 
-def Allc2BallC(allc_path,ballc_path,chrom_size_path,
+def Allc2Ballc(allc_path=None,ballc_path=None,chrom_size_path=None,
                 assembly_text="",header_text="",sc=True):
     """
     Convert allc file into ballc file.
@@ -166,7 +166,21 @@ def Allc2BallC(allc_path,ballc_path,chrom_size_path,
     IndexBallc(ballc_path)
     return ballc_path
 
-def ExtractCMeta(fasta_path=None,cmeta_path=None):
+def extractC(fasta_path=None,cmeta_path=None):
+    """
+    Extract all C position from fasta file.
+
+    Parameters
+    ----------
+    fasta_path: str
+        path for fasta file
+    cmeta_path: str
+        path for the output cmeta file.
+
+    Returns
+    -------
+
+    """
     ExtractCMeta(fasta_path, cmeta_path)
     IndexCMeta(cmeta_path)
     return cmeta_path
@@ -174,9 +188,9 @@ def ExtractCMeta(fasta_path=None,cmeta_path=None):
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
     fire.Fire({
-        "cmeta":ExtractCMeta,
-        "b2a":BAllC2AllC,
-        "a2b":Allc2BallC
+        "cmeta":extractC,
+        "b2a":Ballc2Allc,
+        "a2b":Allc2Ballc
     })
 
 if __name__=="__main__""" :
