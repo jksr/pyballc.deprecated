@@ -155,14 +155,15 @@ sys     0m0.027s
 ```shell
 pyballc header -b test.ballc -c mm10_with_chrL_cmeta.txt.gz
 ```
-````
+
+```
 version_minor: 1
 sc: 1
 assembly_text: test
 l_assembly: 4
 header_text: test header
 l_text: 11
-refs: <Swig Object of type 'std::vector< RefRecord,std::allocator< RefRecord > > *' at 0x7f356f05d840>
+refs: Swig Object of **
 n_refs: 67
 ```
 
