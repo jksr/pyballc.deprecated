@@ -186,17 +186,48 @@ FLAGS
         Type: Optional[]
         Default: None
         input ballc path, should be indexed
-    -c, --cmeta_path=CMETA_PATH
+    --cmeta_path=CMETA_PATH
         Type: Optional[]
         Default: None
     -a, --allc_path=ALLC_PATH
         Type: Optional[]
         Default: None
         output allc file
+    -w, --warn_mismatch=WARN_MISMATCH
+        Default: True
+    -e, --err_mismatch=ERR_MISMATCH
+        Default: True
+    -s, --skip_mismatch=SKIP_MISMATCH
+        Default: True
+    --c_context=C_CONTEXT
+        Default: '*'
 ```
 
 ```shell
-pyballc b2a -b test.ballc -c mm10_with_chrL_cmeta.txt.gz -a test.allc
+time pyballc b2a -b test.ballc --cmeta_path ~/Ref/mm10/annotations/mm10_with_chrL_cmeta.txt.gz -a test.allc
+```
+
+```shell
+Converting BAllC to AllC
+Compressing AllC
+Indexing AllC
+Converting BAllC to AllC finished
+test.allc
+
+real    14m56.884s
+user    14m46.040s
+sys     0m7.990s
+```
+
+test.ballc could be further gzipped to reduce the file size.
+```shell
+gzip test.ballc
+```
+
+file sizes
+```shell
+ 11M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz  1.0M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz.tbi   
+ 11M test.allc.gz  1.0M test.allc.gz.tbi  512K test.ballc.bci  4.5M test.ballc.gz
 ```
 
 #### 2. Python API

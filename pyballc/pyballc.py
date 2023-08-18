@@ -201,6 +201,20 @@ def extractC(fasta_path=None,cmeta_path=None):
     return cmeta_path
 
 def header(ballc_path=None,cmeta_path=None):
+    """
+    Print ballc file header.
+
+    Parameters
+    ----------
+    ballc_path: str
+        path for input ballc path
+    cmeta_path: str
+        path for input cmeta_path
+
+    Returns
+    -------
+
+    """
     bf = BAllCFile(ballc_path, cmeta_path)
     header_dict=bf.header()
     for key in header_dict:
