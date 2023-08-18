@@ -5,6 +5,7 @@ from .pyballcools import (
     BAllC,
     IndexBallc,
     AllCToBallC,
+    BAllCToAllC,
     ExtractCMeta,
     IndexCMeta
 )
@@ -113,7 +114,10 @@ class BAllCFile:
         f.close()
         return allc_path
 
-def Ballc2Allc(ballc_path=None,cmeta_path=None,allc_path=None):
+def Ballc2Allc(ballc_path=None,cmeta_path=None,
+               allc_path=None,warn_mismatch=True,
+               err_mismatch=True,skip_mismatch=True,
+               c_context="*"):
     """
     Convert ballc file into allc path.
 
@@ -125,13 +129,24 @@ def Ballc2Allc(ballc_path=None,cmeta_path=None,allc_path=None):
         path
     allc_path: str
         output allc file
+    warn_mismatch: bool
+        warn_mismatch
+    err_mismatch: bool
+        err_mismatch
+    skip_mismatch: bool
+        skip_mismatch
+    c_context: str
+        c_context
 
     Returns
     -------
 
     """
-    bf = BAllCFile(ballc_path, cmeta_path)
-    allc_path=bf.to_allc(allc_path)
+    # bf = BAllCFile(ballc_path, cmeta_path)
+    # allc_path=bf.to_allc(allc_path)
+    BAllCToAllC(ballc_path, cmeta_path, allc_path,
+                 warn_mismatch, err_mismatch, skip_mismatch,
+                 c_context)
     return allc_path
 
 def index_ballc(ballc_path):
