@@ -47,7 +47,7 @@ pip install git+https://github.com/DingWB/pyballc.git
 ### Usage
 #### 1. Command Line
 ```shell
-pyballc -h
+pyballc --help
 INFO: Showing help with the command 'pyballc -- --help'.
 
 NAME
@@ -67,6 +67,9 @@ COMMANDS
 
      a2b
        Convert allc file into ballc file.
+
+     header
+       Print ballc file header.
 ```
 ##### Extract all C positon from given fasta file
 ```shell
