@@ -40,4 +40,127 @@ pip install .
 
 
 ### Usage
-see ```test``` for examples
+#### 1. Command Line
+```shell
+pyballc -h
+INFO: Showing help with the command 'pyballc -- --help'.
+
+NAME
+    pyballc
+
+SYNOPSIS
+    pyballc COMMAND
+
+COMMANDS
+    COMMAND is one of the following:
+
+     cmeta
+       Extract all C position from fasta file.
+
+     b2a
+       Convert ballc file into allc path.
+
+     a2b
+       Convert allc file into ballc file.
+```
+##### Extract all C positon from given fasta file
+```shell
+pyballc cmeta --help
+INFO: Showing help with the command 'pyballc cmeta -- --help'.
+
+NAME
+    pyballc cmeta - Extract all C position from fasta file.
+
+SYNOPSIS
+    pyballc cmeta <flags>
+
+DESCRIPTION
+    Extract all C position from fasta file.
+
+FLAGS
+    -f, --fasta_path=FASTA_PATH
+        Type: Optional[]
+        Default: None
+        path for fasta file
+    -c, --cmeta_path=CMETA_PATH
+        Type: Optional[]
+        Default: None
+        path for the output cmeta file.
+        
+pyballc cmeta -f ~/Ref/mm10/mm10_ucsc_with_chrL.fa -c mm10_with_chrL_cmeta.txt
+```
+
+##### allc to ballc
+```shell
+pyballc a2b --help
+INFO: Showing help with the command 'pyballc a2b -- --help'.
+
+NAME
+    pyballc a2b - Convert allc file into ballc file.
+
+SYNOPSIS
+    pyballc a2b <flags>
+
+DESCRIPTION
+    Convert allc file into ballc file.
+
+FLAGS
+    --allc_path=ALLC_PATH
+        Type: Optional[]
+        Default: None
+        input allc file path.
+    -b, --ballc_path=BALLC_PATH
+        Type: Optional[]
+        Default: None
+        output ballc path, will be indexed automatically.
+    -c, --chrom_size_path=CHROM_SIZE_PATH
+        Type: Optional[]
+        Default: None
+    --assembly_text=ASSEMBLY_TEXT
+        Default: ''
+        text to be added
+    -h, --header_text=HEADER_TEXT
+        Default: ''
+        text to be added
+    -s, --sc=SC
+        Default: True
+        whether single cell file?
+        
+
+```
+
+#### 2. API
+Read ballc
+```shell
+import pyballc
+ballc_file = 'test.ballc'
+cmeta_file = 'h1930001.cmeta.gz'
+
+region = 'chr1', 0, 80000
+ballc = pyballc.BAllCFile(ballc_file, cmeta_file)
+
+# fetch tuple
+for x in ballc.fetch('chr1', 0, 80000):
+    print(x)
+    
+# fetch all records line by line
+for line in ballc.fetch_line("*",None,None):
+  print(line)
+```
+
+ballc to allc
+```python
+pyballc.Ballc2Allc(ballc_path,cmeta_path,allc_path)
+```
+
+allc to ballc
+```python
+allc_path = "/anvil/scratch/x-wding2/Projects/pyballc/Pool179_Plate1-1-I3-A14.allc.tsv.gz"
+ballc_path = "test.ballc"
+chrom_size_path = os.path.expanduser("~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes")
+assembly_text = "test"
+header_text = "header_test"
+sc = True
+pyballc.AllcToBallC(allc_path, ballc_path, chrom_size_path,
+            assembly_text, header_text, sc)
+```

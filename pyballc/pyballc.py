@@ -134,7 +134,7 @@ def Ballc2Allc(ballc_path=None,cmeta_path=None,allc_path=None):
     allc_path=bf.to_allc(allc_path)
     return allc_path
 
-def IndexBallc(ballc_path):
+def index_ballc(ballc_path):
     IndexBallc(ballc_path)
 
 def Allc2Ballc(allc_path=None,ballc_path=None,chrom_size_path=None,
@@ -163,7 +163,7 @@ def Allc2Ballc(allc_path=None,ballc_path=None,chrom_size_path=None,
     """
     AllCToBallC(allc_path,ballc_path,chrom_size_path,
                 assembly_text,header_text,sc)
-    IndexBallc(ballc_path)
+    index_ballc(ballc_path)
     return ballc_path
 
 def extractC(fasta_path=None,cmeta_path=None):
