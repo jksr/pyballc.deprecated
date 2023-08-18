@@ -185,12 +185,20 @@ def extractC(fasta_path=None,cmeta_path=None):
     IndexCMeta(cmeta_path)
     return cmeta_path
 
+def header(ballc_path=None,cmeta_path=None):
+    bf = BAllCFile(ballc_path, cmeta_path)
+    header_dict=bf.header()
+    for key in header_dict:
+        value=header_dict[key]
+        print(f"{key}: {value}")
+
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
     fire.Fire({
         "cmeta":extractC,
         "b2a":Ballc2Allc,
-        "a2b":Allc2Ballc
+        "a2b":Allc2Ballc,
+        "header":header
     })
 
 if __name__=="__main__""" :

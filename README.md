@@ -37,7 +37,12 @@ git submodule update
 pip install .
 ```
 
+or 
+```shell
+pip install git+https://jksr@github.com/jksr/pyballc
 
+pip install git+https://github.com/DingWB/pyballc.git
+```
 
 ### Usage
 #### 1. Command Line
@@ -125,8 +130,25 @@ FLAGS
     -s, --sc=SC
         Default: True
         whether single cell file?
-        
+```
 
+```shell        
+time pyballc a2b --allc_path FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -b test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text "test" -h "test header" -s
+```
+
+```
+Writing BAllC header to test.ballc
+Converting AllC to BAllC
+Converting AllC to BAllC finished
+Building index for test.ballc
+Warning: The index file is older than the BAllC file. It may be out-of-date.
+Writing the index file test.ballc.bci
+Indexing test.ballc finished
+test.ballc
+
+real    0m3.772s
+user    0m3.707s
+sys     0m0.027s
 ```
 
 #### 2. API
