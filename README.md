@@ -133,7 +133,7 @@ FLAGS
 ```
 
 ```shell        
-time pyballc a2b --allc_path FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -b test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text "test" -h "test header" -s
+time pyballc a2b --allc_path FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -b test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
 ```
 
 ```
@@ -151,7 +151,54 @@ user    0m3.707s
 sys     0m0.027s
 ```
 
-#### 2. API
+##### View ballc header
+```shell
+pyballc header -b test.ballc -c mm10_with_chrL_cmeta.txt.gz
+```
+````
+version_minor: 1
+sc: 1
+assembly_text: test
+l_assembly: 4
+header_text: test header
+l_text: 11
+refs: <Swig Object of type 'std::vector< RefRecord,std::allocator< RefRecord > > *' at 0x7f356f05d840>
+n_refs: 67
+```
+
+##### ballc to allc
+```shell
+pyballc b2a --help
+INFO: Showing help with the command 'pyballc b2a -- --help'.
+
+NAME
+    pyballc b2a - Convert ballc file into allc path.
+
+SYNOPSIS
+    pyballc b2a <flags>
+
+DESCRIPTION
+    Convert ballc file into allc path.
+
+FLAGS
+    -b, --ballc_path=BALLC_PATH
+        Type: Optional[]
+        Default: None
+        input ballc path, should be indexed
+    -c, --cmeta_path=CMETA_PATH
+        Type: Optional[]
+        Default: None
+    -a, --allc_path=ALLC_PATH
+        Type: Optional[]
+        Default: None
+        output allc file
+```
+
+```shell
+pyballc b2a -b test.ballc -c mm10_with_chrL_cmeta.txt.gz -a test.allc
+```
+
+#### 2. Python API
 Read ballc
 ```shell
 import pyballc
