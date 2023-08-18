@@ -2,7 +2,7 @@
 import os.path
 import pyballcools
 #pip install pytabix
-import tabix #
+# import tabix #
 import pysam
 
 class BAllCFile:
@@ -18,14 +18,25 @@ class BAllCFile:
             path for cmeta file ((should be indexed))
         """
         self.bci = pyballcools.BAllCIndex(ballc_file)
-        self.tbi = tabix.open(cmeta_file)  if cmeta_file is not None else None
-        # self.tbi = pysam.TabixFile(cmeta_file) if cmeta_file is not None else None
+        # self.tbi = tabix.open(cmeta_file)  if cmeta_file is not None else None
+        self.tbi = pysam.TabixFile(cmeta_file) if cmeta_file is not None else None
+        self.ballc=pyballcools.BAllC(ballc_file,"r")
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
+
+    def header(self):
+        if hasattr(self,'header_dict'):
+            return self.header_dict
+        self.header_dict={}
+        attrs = ['version_minor', 'sc', 'assembly_text', 'l_assembly', 'header_text', 'l_text', 'refs', 'n_refs']
+        for attr in attrs:
+            # print(attr, self.ballc.header.__getattribute__(attr))
+            self.header_dict[attr]=self.ballc.header.__getattribute__(attr)
+        return self.header_dict
 
     def _fetch_with_cmeta(self, chrom, start, end):
         if chrom=="*":
@@ -37,8 +48,8 @@ class BAllCFile:
         while mciter.HasNext():
             rec = mciter.Next()
             try:
-                # record = next(self.tbi.fetch(rec.chrom,rec.pos-1,rec.pos,)).split()
-                record = next(self.tbi.query(rec.chrom,rec.pos-1,rec.pos))
+                record = next(self.tbi.fetch(rec.chrom,rec.pos-1,rec.pos,)).split()
+                # record = next(self.tbi.query(rec.chrom,rec.pos-1,rec.pos))
                 *_, strand, context = record
                 yield(rec.chrom,rec.pos,strand, context, rec.mc,rec.cov, )
             except:
@@ -150,11 +161,14 @@ def AllcToBallC(allc_path,ballc_path,chrom_size_path,
 def test():
     ballc_file = '/anvil/scratch/x-wding2/Projects/pyballc/test.ballc'
     cmeta_file = '/anvil/scratch/x-wding2/Projects/pyballc/h1930001.cmeta.gz'
+
+    # test ballc to allc
     bf = BAllCFile(ballc_file, cmeta_file)
     for x in bf.fetch('chr1', 0, 80000):
         print(x)
     bf.to_allc("test.allc.txt")
 
+    # test allc to ballc
     allc_path = "/anvil/scratch/x-wding2/Projects/pyballc/Pool179_Plate1-1-I3-A14.allc.tsv.gz"
     ballc_path = "test.ballc"
     chrom_size_path = os.path.expanduser("~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes")
