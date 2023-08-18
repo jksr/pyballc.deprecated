@@ -1,10 +1,9 @@
 # from . import pyballcools
 import os.path
-import pyballcools
+from .pyballcools import *
 #pip install pytabix
 # import tabix #
 import pysam
-import fire
 
 class BAllCFile:
     def __init__(self, ballc_file, cmeta_file=None):
@@ -191,10 +190,3 @@ def test():
     for x in bf.fetch(chrom, start, end):
         print(x)
         break
-
-def main():
-    fire.core.Display = lambda lines, out: print(*lines, file=out)
-    fire.Fire()
-
-if __name__=="__main__":
-    main()

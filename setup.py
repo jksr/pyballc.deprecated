@@ -62,7 +62,8 @@ setup(
     ],
 
     entry_points={
-        'console_scripts': ['pyballc=pyballc.pyballc:main',
+        'console_scripts': [
+                                    'pyballc=pyballc.pyballc:main',
                             ],
     }
 )
