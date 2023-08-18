@@ -1,6 +1,13 @@
 # from . import pyballcools
 import os.path
-from .pyballcools import *
+from .pyballcools import (
+    BAllCIndex,
+    BAllC,
+    IndexBallc,
+    AllCToBallC,
+    ExtractCMeta,
+    IndexCMeta
+)
 #pip install pytabix
 # import tabix #
 import pysam
@@ -18,10 +25,10 @@ class BAllCFile:
         cmeta_file: str
             path for cmeta file ((should be indexed))
         """
-        self.bci = pyballcools.BAllCIndex(ballc_file)
+        self.bci = BAllCIndex(ballc_file)
         # self.tbi = tabix.open(cmeta_file)  if cmeta_file is not None else None
         self.tbi = pysam.TabixFile(cmeta_file) if cmeta_file is not None else None
-        self.ballc=pyballcools.BAllC(ballc_file,"r")
+        self.ballc=BAllC(ballc_file,"r")
 
     def __enter__(self):
         return self
@@ -106,7 +113,7 @@ class BAllCFile:
         f.close()
         return allc_path
 
-def BAllCToAllC(ballc_path,cmeta_path,allc_path):
+def BAllC2AllC(ballc_path,cmeta_path,allc_path):
     """
     Convert ballc file into allc path.
 
@@ -128,9 +135,9 @@ def BAllCToAllC(ballc_path,cmeta_path,allc_path):
     return allc_path
 
 def IndexBallc(ballc_path):
-    pyballcools.IndexBallc(ballc_path)
+    IndexBallc(ballc_path)
 
-def AllcToBallC(allc_path,ballc_path,chrom_size_path,
+def Allc2BallC(allc_path,ballc_path,chrom_size_path,
                 assembly_text="",header_text="",sc=True):
     """
     Convert allc file into ballc file.
@@ -154,50 +161,22 @@ def AllcToBallC(allc_path,ballc_path,chrom_size_path,
     -------
 
     """
-    pyballcools.AllCToBallC(allc_path,ballc_path,chrom_size_path,
+    AllCToBallC(allc_path,ballc_path,chrom_size_path,
                 assembly_text,header_text,sc)
     IndexBallc(ballc_path)
     return ballc_path
 
 def ExtractCMeta(fasta_path=None,cmeta_path=None):
-    pyballcools.ExtractCMeta(fasta_path, cmeta_path)
-    pyballcools.IndexCMeta(cmeta_path)
+    ExtractCMeta(fasta_path, cmeta_path)
+    IndexCMeta(cmeta_path)
     return cmeta_path
-
-def test():
-    ballc_file = '/anvil/scratch/x-wding2/Projects/pyballc/test.ballc'
-    cmeta_file = '/anvil/scratch/x-wding2/Projects/pyballc/h1930001.cmeta.gz'
-
-    # test ballc to allc
-    bf = BAllCFile(ballc_file, cmeta_file)
-    for x in bf.fetch('chr1', 0, 80000):
-        print(x)
-    bf.to_allc("test.allc.txt")
-
-    # test allc to ballc
-    allc_path = "/anvil/scratch/x-wding2/Projects/pyballc/Pool179_Plate1-1-I3-A14.allc.tsv.gz"
-    ballc_path = "test.ballc"
-    chrom_size_path = os.path.expanduser("~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes")
-    assembly_text = "test"
-    header_text = "header_test"
-    sc = True
-    AllcToBallC(allc_path, ballc_path, chrom_size_path,
-                assembly_text, header_text, sc)
-
-    bf = BAllCFile("test.ballc", cmeta_file)
-    # bf.to_allc("test.allc.txt")
-
-    chrom, start, end = "chrX", 4885350, 4885424
-    for x in bf.fetch(chrom, start, end):
-        print(x)
-        break
 
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
     fire.Fire({
         "cmeta":ExtractCMeta,
-        "b2a":BAllCToAllC,
-        "a2b":AllcToBallC
+        "b2a":BAllC2AllC,
+        "a2b":Allc2BallC
     })
 
 if __name__=="__main__""" :
