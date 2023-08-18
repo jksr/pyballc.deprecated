@@ -201,7 +201,7 @@ pyballc b2a -b test.ballc -c mm10_with_chrL_cmeta.txt.gz -a test.allc
 
 #### 2. Python API
 Read ballc
-```shell
+```python
 import pyballc
 ballc_file = 'test.ballc'
 cmeta_file = 'h1930001.cmeta.gz'
