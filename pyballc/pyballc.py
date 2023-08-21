@@ -1,4 +1,5 @@
 # from . import pyballcools
+import os,sys
 import os.path
 from .pyballcools import (
     BAllCIndex,
@@ -245,7 +246,10 @@ def query(ballc_path,cmeta_path=None,
     """
     bf = BAllCFile(ballc_path, cmeta_path)
     for line in bf.fetch_line(chrom, start, end):
-        print(line)
+        try:
+            sys.stdout.write(line+'\n')
+        except:
+            sys.stdout.close()
 
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
