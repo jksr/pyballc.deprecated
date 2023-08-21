@@ -250,6 +250,7 @@ def query(ballc_path,cmeta_path=None,
             sys.stdout.write(line+'\n')
         except:
             sys.stdout.close()
+            break
 
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
