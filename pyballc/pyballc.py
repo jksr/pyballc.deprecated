@@ -63,7 +63,8 @@ class BAllCFile:
                 *_, strand, context = record
                 yield(rec.chrom,rec.pos,strand, context, rec.mc,rec.cov, )
             except:
-                print(f"No meta data found for {rec.chrom}:{rec.pos-1}-{rec.pos}",end="\r")
+                pass
+                # print(f"No meta data found for {rec.chrom}:{rec.pos-1}-{rec.pos}")
 
     def _fetch(self, chrom, start, end):
         if chrom=="*":
