@@ -114,8 +114,8 @@ class BAllCFile:
         f.close()
         return allc_path
 
-def Ballc2Allc(ballc_path=None,cmeta_path=None,
-               allc_path=None,warn_mismatch=True,
+def Ballc2Allc(ballc_path,cmeta_path,
+               allc_path,warn_mismatch=True,
                err_mismatch=True,skip_mismatch=True,
                c_context="*"):
     """
@@ -152,7 +152,7 @@ def Ballc2Allc(ballc_path=None,cmeta_path=None,
 def index_ballc(ballc_path):
     IndexBallc(ballc_path)
 
-def Allc2Ballc(allc_path=None,ballc_path=None,chrom_size_path=None,
+def Allc2Ballc(allc_path,ballc_path,chrom_size_path=None,
                 assembly_text="",header_text="",sc=True):
     """
     Convert allc file into ballc file.
@@ -181,7 +181,7 @@ def Allc2Ballc(allc_path=None,ballc_path=None,chrom_size_path=None,
     index_ballc(ballc_path)
     return ballc_path
 
-def extractC(fasta_path=None,cmeta_path=None):
+def extractC(fasta_path,cmeta_path):
     """
     Extract all C position from fasta file.
 
@@ -200,7 +200,7 @@ def extractC(fasta_path=None,cmeta_path=None):
     IndexCMeta(cmeta_path)
     return cmeta_path
 
-def header(ballc_path=None,cmeta_path=None):
+def header(ballc_path,cmeta_path):
     """
     Print ballc file header.
 
@@ -221,13 +221,40 @@ def header(ballc_path=None,cmeta_path=None):
         value=header_dict[key]
         print(f"{key}: {value}")
 
+def query(ballc_path,cmeta_path=None,
+          chrom="*", start=None, end=None):
+    """
+    Query ballc file with or without cmeta index.
+
+    Parameters
+    ----------
+    ballc_path: str
+        path for ballc file.
+    cmeta_path: str
+        path for cmeta file
+    chrom: str
+        chromosome, "*" to query all records.
+    start: int
+        start position, if chrom=="*", start can be ignored.
+    end: int
+        start position, if chrom=="*", start can be ignored.
+
+    Returns
+    -------
+
+    """
+    bf = BAllCFile(ballc_path, cmeta_path)
+    for line in bf.fetch_line(chrom, start, end):
+        print(line)
+
 def main():
     fire.core.Display = lambda lines, out: print(*lines, file=out)
     fire.Fire({
         "cmeta":extractC,
         "b2a":Ballc2Allc,
         "a2b":Allc2Ballc,
-        "header":header
+        "header":header,
+        "query": query
     })
 
 if __name__=="__main__""" :
