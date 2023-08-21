@@ -70,6 +70,9 @@ COMMANDS
 
      header
        Print ballc file header.
+
+     query
+       Query ballc file with or without cmeta index.
 ```
 ##### Extract all C positon from given fasta file
 ```shell
@@ -80,21 +83,22 @@ NAME
     pyballc cmeta - Extract all C position from fasta file.
 
 SYNOPSIS
-    pyballc cmeta <flags>
+    pyballc cmeta FASTA_PATH CMETA_PATH
 
 DESCRIPTION
     Extract all C position from fasta file.
 
-FLAGS
-    -f, --fasta_path=FASTA_PATH
-        Type: Optional[]
-        Default: None
+POSITIONAL ARGUMENTS
+    FASTA_PATH
         path for fasta file
-    -c, --cmeta_path=CMETA_PATH
-        Type: Optional[]
-        Default: None
+    CMETA_PATH
         path for the output cmeta file.
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
         
+pyballc cmeta ~/Ref/mm10/mm10_ucsc_with_chrL.fa mm10_with_chrL_cmeta.txt
+# or
 pyballc cmeta -f ~/Ref/mm10/mm10_ucsc_with_chrL.fa -c mm10_with_chrL_cmeta.txt
 ```
 
@@ -107,24 +111,22 @@ NAME
     pyballc a2b - Convert allc file into ballc file.
 
 SYNOPSIS
-    pyballc a2b <flags>
+    pyballc a2b ALLC_PATH BALLC_PATH <flags>
 
 DESCRIPTION
     Convert allc file into ballc file.
 
-FLAGS
-    --allc_path=ALLC_PATH
-        Type: Optional[]
-        Default: None
+POSITIONAL ARGUMENTS
+    ALLC_PATH
         input allc file path.
-    -b, --ballc_path=BALLC_PATH
-        Type: Optional[]
-        Default: None
+    BALLC_PATH
         output ballc path, will be indexed automatically.
+
+FLAGS
     -c, --chrom_size_path=CHROM_SIZE_PATH
         Type: Optional[]
         Default: None
-    --assembly_text=ASSEMBLY_TEXT
+    -a, --assembly_text=ASSEMBLY_TEXT
         Default: ''
         text to be added
     -h, --header_text=HEADER_TEXT
@@ -133,9 +135,14 @@ FLAGS
     -s, --sc=SC
         Default: True
         whether single cell file?
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
 ```
 
 ```shell        
+time pyballc a2b FC_E17a_3C_8-6-I15-M23.allc.tsv.gz test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
+# or
 time pyballc a2b --allc_path FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -b test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
 ```
 
@@ -170,6 +177,47 @@ refs: Swig Object of **
 n_refs: 67
 ```
 
+##### Query ballc
+```shell
+pyballc query --help
+INFO: Showing help with the command 'pyballc query -- --help'.
+
+NAME
+    pyballc query - Query ballc file with or without cmeta index.
+
+SYNOPSIS
+    pyballc query BALLC_PATH <flags>
+
+DESCRIPTION
+    Query ballc file with or without cmeta index.
+
+POSITIONAL ARGUMENTS
+    BALLC_PATH
+        path for ballc file.
+
+FLAGS
+    --cmeta_path=CMETA_PATH
+        Type: Optional[]
+        Default: None
+        path for cmeta file
+    --chrom=CHROM
+        Default: '*'
+        chromosome, "*" to query all records.
+    -s, --start=START
+        Type: Optional[]
+        Default: None
+        start position, if chrom=="*", start can be ignored.
+    -e, --end=END
+        Type: Optional[]
+        Default: None
+        start position, if chrom=="*", start can be ignored.
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
+```
+```shell
+pyballc query test.ballc --cmeta_path ~/Ref/mm10/annotations/mm10_with_chrL_cmeta.txt.gz --chrom chr1 -s 3004025 -e 3004055
+```
 ##### ballc to allc
 ```shell
 pyballc b2a --help
@@ -179,31 +227,30 @@ NAME
     pyballc b2a - Convert ballc file into allc path.
 
 SYNOPSIS
-    pyballc b2a <flags>
+    pyballc b2a BALLC_PATH CMETA_PATH ALLC_PATH <flags>
 
 DESCRIPTION
     Convert ballc file into allc path.
 
-FLAGS
-    -b, --ballc_path=BALLC_PATH
-        Type: Optional[]
-        Default: None
+POSITIONAL ARGUMENTS
+    BALLC_PATH
         input ballc path, should be indexed
-    --cmeta_path=CMETA_PATH
-        Type: Optional[]
-        Default: None
-    -a, --allc_path=ALLC_PATH
-        Type: Optional[]
-        Default: None
+    CMETA_PATH
+    ALLC_PATH
         output allc file
+
+FLAGS
     -w, --warn_mismatch=WARN_MISMATCH
         Default: True
     -e, --err_mismatch=ERR_MISMATCH
         Default: True
     -s, --skip_mismatch=SKIP_MISMATCH
         Default: True
-    --c_context=C_CONTEXT
+    -c, --c_context=C_CONTEXT
         Default: '*'
+
+NOTES
+    You can also use flags syntax for POSITIONAL ARGUMENTS
 ```
 
 ```shell
