@@ -140,6 +140,28 @@ NOTES
     You can also use flags syntax for POSITIONAL ARGUMENTS
 ```
 
+```shell
+ls FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -sh
+# 11M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz
+
+zcat FC_E17a_3C_8-6-I15-M23.allc.tsv.gz |wc -l
+# 3025059
+
+zcat FC_E17a_3C_8-6-I15-M23.allc.tsv.gz |head
+```
+```shell
+chr1	3004019	+	CAC	0	1	1
+chr1	3004025	+	CTG	0	1	1
+chr1	3004030	+	CTC	0	1	1
+chr1	3004032	+	CAG	0	1	1
+chr1	3004040	+	CCT	0	1	1
+chr1	3004041	+	CTA	0	1	1
+chr1	3004049	+	CAA	0	1	1
+chr1	3004055	+	CAA	0	1	1
+chr1	3004065	+	CTT	0	1	1
+chr1	3004083	+	CAA	0	1	1
+```
+
 ```shell        
 time pyballc a2b FC_E17a_3C_8-6-I15-M23.allc.tsv.gz test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
 # or
