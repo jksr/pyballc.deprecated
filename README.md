@@ -342,8 +342,46 @@ pyballc.AllcToBallC(allc_path, ballc_path, chrom_size_path,
             assembly_text, header_text, sc)
 ```
 
+### 3. Conversion time
+```shell
+mkdir -p test_ballc
+gsutil ls gs://mouse_pfc/allc/devel_1 > test_allc_path.txt
+```
 
-### 3. Storage reduction
+#### Randomly select 100 allc files
+```python
+import random
+with open("test_allc_path.txt",'r') as f:
+    lines=f.readlines()
+allc_files=[line.strip() for line in lines if '.tbi' not in line]
+selected_allc_files=random.sample(allc_files,100)
+with open("100allc.txt",'w') as f:
+    for file in selected_allc_files:
+        f.write(file+'\n')
+```
+#### Download 100 allc files
+```shell
+mkdir allc_files
+cat 100allc.txt | while read path; do
+    echo ${path}
+    gsutil -m cp -n ${path}* allc_files
+  done;
+```
+
+#### Test allc to ballc speed
+Machine information:
+```text
+Machine type: n2-standard-4
+vCPU: 4
+Memory: 16GB
+```
+#### Conversion
+```shell
+mkdir -p ballc
+# Convert one by one
+```
+
+### 4. Storage reduction
 ```python
 import os,sys
 import pandas as pd
@@ -391,7 +429,7 @@ Average No. of records: 32294578.555555556
 ```
 
 
-### 4. merge
+### 5. merge
 ```shell
 time ballcools merge -f test/ballc_path.txt test/merged.ballc
 #Merging finished. 63 ballc files.
@@ -401,7 +439,7 @@ time ballcools merge -f test/ballc_path.txt test/merged.ballc
 #sys     0m32.174s
 ```
 
-### 5. Usage for non-single cell datasets
+### 6. Usage for non-single cell datasets
 #### Create meta index file
 ```shell
 mkdir Mammal40
