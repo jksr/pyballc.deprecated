@@ -8,7 +8,7 @@ Pyballc is a python module to read/manipulate BAllC files. It is based on the [B
 _Currently only reading and querying operations are supported, but more is comming:wink:_
 
 
-### Dependency
+## Dependency
 ```g++``` (with -std=c++11 supported)
 
 ```libhts``` (```conda``` installation recommended)
@@ -20,7 +20,7 @@ _Currently only reading and querying operations are supported, but more is commi
 ```libbz2``` (usually no installation needed. should be available for most systems)
 
 
-### Installation
+## Installation
 pyballc is a stand alone package. You don't need to install BAllCools separately.
 
 **Installing from pypi**
@@ -44,8 +44,8 @@ pip install git+https://jksr@github.com/jksr/pyballc
 pip install git+https://github.com/DingWB/pyballc.git
 ```
 
-### Usage
-#### 1. Command Line
+## Usage
+### 1. Command Line
 ```shell
 pyballc --help
 INFO: Showing help with the command 'pyballc -- --help'.
@@ -74,7 +74,7 @@ COMMANDS
      query
        Query ballc file with or without cmeta index.
 ```
-##### Extract all C positon from given fasta file
+#### Extract all C positon from given fasta file
 ```shell
 pyballc cmeta --help
 INFO: Showing help with the command 'pyballc cmeta -- --help'.
@@ -102,7 +102,7 @@ pyballc cmeta ~/Ref/mm10/mm10_ucsc_with_chrL.fa mm10_with_chrL_cmeta.txt
 pyballc cmeta -f ~/Ref/mm10/mm10_ucsc_with_chrL.fa -c mm10_with_chrL_cmeta.txt
 ```
 
-##### allc to ballc
+#### allc to ballc
 ```shell
 pyballc a2b --help
 INFO: Showing help with the command 'pyballc a2b -- --help'.
@@ -142,14 +142,15 @@ NOTES
 
 ```shell
 ls FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -sh
-# 11M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz
+# 11M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz (11152529 bytes)
+# plain text (77M, 80675455)
 
 zcat FC_E17a_3C_8-6-I15-M23.allc.tsv.gz |wc -l
 # 3025059
 
 zcat FC_E17a_3C_8-6-I15-M23.allc.tsv.gz |head
 ```
-```shell
+```text
 chr1	3004019	+	CAC	0	1	1
 chr1	3004025	+	CTG	0	1	1
 chr1	3004030	+	CTC	0	1	1
@@ -166,9 +167,12 @@ chr1	3004083	+	CAA	0	1	1
 time pyballc a2b FC_E17a_3C_8-6-I15-M23.allc.tsv.gz test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
 # or
 time pyballc a2b --allc_path FC_E17a_3C_8-6-I15-M23.allc.tsv.gz -b test.ballc -c ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes --assembly_text test -h test_header -s
+
+# test.ballc
+# 5M, 5107194 bytes
 ```
 
-```
+```text
 Writing BAllC header to test.ballc
 Converting AllC to BAllC
 Converting AllC to BAllC finished
@@ -183,12 +187,12 @@ user    0m3.707s
 sys     0m0.027s
 ```
 
-##### View ballc header
+#### View ballc header
 ```shell
 pyballc header -b test.ballc -c mm10_with_chrL_cmeta.txt.gz
 ```
 
-```
+```text
 version_minor: 1
 sc: 1
 assembly_text: test
@@ -199,7 +203,7 @@ refs: Swig Object of **
 n_refs: 67
 ```
 
-##### Query ballc
+#### Query ballc
 ```shell
 pyballc query --help
 INFO: Showing help with the command 'pyballc query -- --help'.
@@ -240,7 +244,7 @@ NOTES
 ```shell
 pyballc query test.ballc --cmeta_path ~/Ref/mm10/annotations/mm10_with_chrL_cmeta.txt.gz --chrom chr1 -s 3004025 -e 3004055
 ```
-##### ballc to allc
+#### ballc to allc
 ```shell
 pyballc b2a --help
 INFO: Showing help with the command 'pyballc b2a -- --help'.
@@ -279,7 +283,7 @@ NOTES
 time pyballc b2a -b test.ballc --cmeta_path ~/Ref/mm10/annotations/mm10_with_chrL_cmeta.txt.gz -a test.allc
 ```
 
-```shell
+```text
 Converting BAllC to AllC
 Compressing AllC
 Indexing AllC
@@ -297,12 +301,12 @@ gzip test.ballc
 ```
 
 file sizes
-```shell
+```text
  11M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz  1.0M FC_E17a_3C_8-6-I15-M23.allc.tsv.gz.tbi   
  11M test.allc.gz  1.0M test.allc.gz.tbi  512K test.ballc.bci  4.5M test.ballc.gz
 ```
 
-#### 2. Python API
+### 2. Python API
 Read ballc
 ```python
 import pyballc
@@ -336,4 +340,180 @@ header_text = "header_test"
 sc = True
 pyballc.AllcToBallC(allc_path, ballc_path, chrom_size_path,
             assembly_text, header_text, sc)
+```
+
+
+### 3. Storage reduction
+```python
+import os,sys
+import pandas as pd
+df=pd.DataFrame([f.replace('.ballc','') for f in os.listdir("./") if f .endswith('.ballc')],
+                columns=['SampleID'])
+df['allc_size']=df.SampleID.apply(lambda x:os.path.getsize(f"allc/{x}.allc.tsv"))
+df['allc_gz_size']=df.SampleID.apply(lambda x:os.path.getsize(f"{x}.allc.tsv.gz"))
+df['ballc_size']=df.SampleID.apply(lambda x:os.path.getsize(f"{x}.ballc"))
+df['gz_reduce']=(df.allc_gz_size - df.ballc_size) / df.allc_gz_size
+df['plain_text_reduce']=(df.allc_size - df.ballc_size) / df.allc_size
+print("Average reduce size for *allc.tsv.gz: %s"%(df.gz_reduce.mean() * 100))
+print("Average reduce size for *allc.tsv: %s"%(df.plain_text_reduce.mean() * 100))
+def wc(file):
+    f=open(file,'r')
+    i=0
+    line=f.readline()
+    while line:
+        i+=1
+        line=f.readline()
+    f.close()
+    return i
+
+df['No.Records']=df.SampleID.apply(lambda x:wc(f"allc/{x}.allc.tsv"))
+print("Average No. of records: %s"%(df['No.Records'].mean()))
+df
+```
+```text
+Average reduce size for *allc.tsv.gz: 55.338291329041
+Average reduce size for *allc.tsv: 93.49512318067059
+Average No. of records: 32294578.555555556
+                         SampleID   allc_size  allc_gz_size  ballc_size  gz_reduce  plain_text_reduce  No.Records
+0    AG_JF1NQ_AR_Plate10-1-I15-J1   691536116     100832383    44997569   0.553739           0.934931    25906516
+1   AG_JF1NQ_AR_Plate10-1-I15-C14  1003919255     146296085    65225519   0.554154           0.935029    37604603
+2   AG_JF1NQ_AR_Plate10-1-I15-M13   956987899     139472976    62259197   0.553611           0.934943    35844682
+3   AG_JF1NQ_AR_Plate10-1-I15-D13  1078080507     156790589    70040827   0.553284           0.935032    40379983
+4   AG_JF1NQ_AR_Plate10-1-I15-P13   956937535     139306655    62271268   0.552991           0.934927    35841634
+..                            ...         ...           ...         ...        ...                ...         ...
+58   AG_JF1NQ_AR_Plate10-1-I15-L1  1038034137     151099535    67577030   0.552765           0.934899    38881334
+59  AG_JF1NQ_AR_Plate10-1-I15-A14  1006003011     146344525    65182630   0.554595           0.935206    37682515
+60  AG_JF1NQ_AR_Plate10-1-I15-H13   894854438     130280878    57995033   0.554846           0.935191    33517883
+61  AG_JF1NQ_AR_Plate10-1-I15-N14  1007703326     146931230    65661719   0.553113           0.934840    37744544
+62   AG_JF1NQ_AR_Plate10-1-I15-O1   853060638     124311383    55627544   0.552514           0.934791    31955764
+
+[63 rows x 7 columns]
+```
+
+
+### 4. merge
+```shell
+time ballcools merge -f test/ballc_path.txt test/merged.ballc
+#Merging finished. 63 ballc files.
+
+#real    51m58.078s
+#user    50m41.804s
+#sys     0m32.174s
+```
+
+### 5. Usage for non-single cell datasets
+#### Create meta index file
+```shell
+mkdir Mammal40
+wget https://github.com/zhou-lab/InfiniumAnnotationV1/raw/main/Anno/Mammal40/Mammal40.hg38.manifest.tsv.gz
+# create cmeta index file
+awk 'BEGIN{FS=OFS="\t"};{if(NR >1 && $1!="NA"){print $9,1,".","CG"}}' Mammal40.hg38.manifest.tsv |sort -k 1,1 -k 2,2n |bgzip > mammal40_meta.bed.gz
+tabix -f -b 2 -e 2 -s 1 mammal40_meta.bed.gz
+zcat mammal40_meta.bed.gz |head
+```
+
+```text
+cg00000165      1       .       CG
+cg00001209      1       .       CG
+cg00001364      1       .       CG
+cg00001582      1       .       CG
+cg00002920      1       .       CG
+cg00003994      1       .       CG
+cg00004555      1       .       CG
+cg00005112      1       .       CG
+cg00005271      1       .       CG
+cg00006213      1       .       CG
+```
+
+You can chose custom field to be included in the meta index file as your wish.
+
+#### Prepare example methylation array dataset.
+Download the example dataset from GEO with accession ID: GSE173330
+Similarly, one can chose custom field to be included in sample allc file, here, we choose beta value and p-value to be included in allc file for each sample.
+```shell
+head test.bed
+```
+```text
+cg00000165      0.417660370297546       0.244289340101523
+cg00001209      0.891975949908926       0.0056237218813906
+cg00001364      0.419087384097591       0.0071574642126789
+cg00001582      0.0574073237198707      0.0044416243654822
+cg00002920      0.509226493083919       0.335378323108384
+cg00003994      0.0494848794490276      0.0152284263959391
+cg00004555      0.183195004139376       0.0431472081218274
+cg00005112      0.871984516124028       0.0028118609406953
+cg00005271      0.969467259727841       0.0035787321063395
+cg00006213      0.962269523745587       0.0012781186094069
+```
+Let's add several columns to make it looks like allc file
+```shell
+awk 'BEGIN{FS=OFS="\t"};{print $1,1,".","CG",$2,$3}' test.bed |bgzip > test.tsv.gz
+zcat test.tsv.gz |head
+```
+In this example test.tsv.gz, columsn are: probe ID, start position, strand, beta, pvalue
+```text
+cg00000165      1       .       CG      0.417660370297546       0.244289340101523
+cg00001209      1       .       CG      0.891975949908926       0.0056237218813906
+cg00001364      1       .       CG      0.419087384097591       0.0071574642126789
+cg00001582      1       .       CG      0.0574073237198707      0.0044416243654822
+cg00002920      1       .       CG      0.509226493083919       0.335378323108384
+cg00003994      1       .       CG      0.0494848794490276      0.0152284263959391
+cg00004555      1       .       CG      0.183195004139376       0.0431472081218274
+cg00005112      1       .       CG      0.871984516124028       0.0028118609406953
+cg00005271      1       .       CG      0.969467259727841       0.0035787321063395
+cg00006213      1       .       CG      0.962269523745587       0.0012781186094069
+```
+```shell
+beta=pd.read_csv("20211117_GSE173330_Mammal40_betas.txt",sep='\t',index_col=0,usecols=['GSM5265435'])
+pval=pd.read_csv("20211117_GSE173330_Mammal40_pvals.txt",sep='\t',index_col=0,usecols=['GSM5265435'])
+beta.rename(columns={'GSM5265435':'beta'},inplace=True)
+beta['pval']=beta.index.to_series().map(pval.GSM5265435.to_dict())
+idx=pd.read_csv('mammal40_meta.bed.gz',sep='\t',header=None)
+use_rows=list(set(beta.index.tolist()) & set(idx[0].tolist()))
+beta=beta.loc[use_rows]
+beta.to_csv("test.bed",sep='\t',header=False)
+```
+
+
+#### Convert allc to ballc
+```shell
+ballcools a2b -a mammal40_meta.bed.gz test.tsv.gz test.ballc chrom_size.bed
+ballcools index test.ballc
+```
+
+#### Query probe
+```shell
+ballcools query test.ballc cg17254774
+```
+
+#### ballc to allc
+```shell
+ballcools b2a test.ballc mammal40_meta.bed.gz test_allc
+zcat test_allc.allc.tsv.gz |head
+```
+
+```text
+cg05604535      1       .       CG      0       0       1
+cg19972243      1       .       CG      0       0       1
+cg20983335      1       .       CG      0       0       1
+cg13951226      1       .       CG      0       0       1
+cg13853159      1       .       CG      0       0       1
+cg18686900      1       .       CG      0       0       1
+cg15855498      1       .       CG      0       0       1
+cg17254774      1       .       CG      0       0       1
+cg00058449      1       .       CG      0       0       1
+cg08019519      1       .       CG      0       0       1
+```
+
+
+file sizes
+```text
+-rw-rw-r-- 1 wding wding  128486 Sep 12 16:56 mammal40_meta.bed.gz
+-rw-rw-r-- 1 wding wding  439202 Sep 12 16:56 mammal40_meta.bed.gz.tbi
+-rw-rw-r-- 1 wding wding  169401 Sep 12 17:06 test_allc.allc.tsv.gz
+-rw-rw-r-- 1 wding wding  472876 Sep 12 17:06 test_allc.allc.tsv.gz.tbi
+-rw-rw-r-- 1 wding wding  200232 Sep 12 17:01 test.ballc
+-rw-rw-r-- 1 wding wding  193909 Sep 12 17:01 test.ballc.bci
+-rw-rw-r-- 1 wding wding 1778349 Sep 12 17:00 test.bed
+-rw-rw-r-- 1 wding wding  609890 Sep 12 17:01 test.tsv.gz
 ```
