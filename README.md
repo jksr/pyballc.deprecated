@@ -376,70 +376,127 @@ vCPU: 4
 Memory: 16GB
 ```
 #### Conversion
+Comprssed allc.tsv.gz
+vim run_a2b.sh
 ```shell
 mkdir -p ballc
-# Convert one by one
+for allc in `find allc_files -name "*.allc.tsv.gz"`; do
+  sname=$(basename ${allc})
+  prefix=${sname/.allc.tsv.gz/}
+  echo "SampleID" :${prefix}
+  /home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools a2b -a mm10_with_chrL_cmeta.txt.gz ${allc} ballc/${prefix}.ballc Ref/mm10_ucsc_with_chrL.chrom.sizes
+  echo "----"
+done;
 ```
-
-### 4. Storage reduction
-```python
-import os,sys
-import pandas as pd
-df=pd.DataFrame([f.replace('.ballc','') for f in os.listdir("./") if f .endswith('.ballc')],
-                columns=['SampleID'])
-df['allc_size']=df.SampleID.apply(lambda x:os.path.getsize(f"allc/{x}.allc.tsv"))
-df['allc_gz_size']=df.SampleID.apply(lambda x:os.path.getsize(f"{x}.allc.tsv.gz"))
-df['ballc_size']=df.SampleID.apply(lambda x:os.path.getsize(f"{x}.ballc"))
-df['gz_reduce']=(df.allc_gz_size - df.ballc_size) / df.allc_gz_size
-df['plain_text_reduce']=(df.allc_size - df.ballc_size) / df.allc_size
-print("Average reduce size for *allc.tsv.gz: %s"%(df.gz_reduce.mean() * 100))
-print("Average reduce size for *allc.tsv: %s"%(df.plain_text_reduce.mean() * 100))
-def wc(file):
-    f=open(file,'r')
-    i=0
-    line=f.readline()
-    while line:
-        i+=1
-        line=f.readline()
-    f.close()
-    return i
-
-df['No.Records']=df.SampleID.apply(lambda x:wc(f"allc/{x}.allc.tsv"))
-print("Average No. of records: %s"%(df['No.Records'].mean()))
-df
-```
-```text
-Average reduce size for *allc.tsv.gz: 55.338291329041
-Average reduce size for *allc.tsv: 93.49512318067059
-Average No. of records: 32294578.555555556
-                         SampleID   allc_size  allc_gz_size  ballc_size  gz_reduce  plain_text_reduce  No.Records
-0    AG_JF1NQ_AR_Plate10-1-I15-J1   691536116     100832383    44997569   0.553739           0.934931    25906516
-1   AG_JF1NQ_AR_Plate10-1-I15-C14  1003919255     146296085    65225519   0.554154           0.935029    37604603
-2   AG_JF1NQ_AR_Plate10-1-I15-M13   956987899     139472976    62259197   0.553611           0.934943    35844682
-3   AG_JF1NQ_AR_Plate10-1-I15-D13  1078080507     156790589    70040827   0.553284           0.935032    40379983
-4   AG_JF1NQ_AR_Plate10-1-I15-P13   956937535     139306655    62271268   0.552991           0.934927    35841634
-..                            ...         ...           ...         ...        ...                ...         ...
-58   AG_JF1NQ_AR_Plate10-1-I15-L1  1038034137     151099535    67577030   0.552765           0.934899    38881334
-59  AG_JF1NQ_AR_Plate10-1-I15-A14  1006003011     146344525    65182630   0.554595           0.935206    37682515
-60  AG_JF1NQ_AR_Plate10-1-I15-H13   894854438     130280878    57995033   0.554846           0.935191    33517883
-61  AG_JF1NQ_AR_Plate10-1-I15-N14  1007703326     146931230    65661719   0.553113           0.934840    37744544
-62   AG_JF1NQ_AR_Plate10-1-I15-O1   853060638     124311383    55627544   0.552514           0.934791    31955764
-
-[63 rows x 7 columns]
-```
-
-
-### 5. merge
 ```shell
-time ballcools merge -f test/ballc_path.txt test/merged.ballc
-#Merging finished. 63 ballc files.
-
-#real    51m58.078s
-#user    50m41.804s
-#sys     0m32.174s
+nohup bash run_a2b.sh > a2b.log &
 ```
 
-### 6. Usage for non-single cell datasets
+vim run_a2b_unzip.sh
+```shell
+mkdir -p ballc
+for allc in `find allc_files -name "*.allc.tsv.gz"`; do
+  sname=$(basename ${allc})
+  prefix=${sname/.allc.tsv.gz/}
+  echo "SampleID" :${prefix}
+  gunzip ${allc}
+  /home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools a2b -a mm10_with_chrL_cmeta.txt.gz allc_files/${prefix}.allc.tsv ballc/${prefix}.ballc Ref/mm10_ucsc_with_chrL.chrom.sizes
+  wc -l allc_files/${prefix}.allc.tsv
+  ls -l allc_files/${prefix}.allc.tsv
+  echo "----"
+  rm -f allc_files/${prefix}.allc.tsv*
+done;
+
+nohup bash run_a2b_unzip.sh > a2b_unzip.log &
+```
+
+```python
+import os, sys
+import pandas as pd
+
+infile = "a2b_unzip.log"
+with open(infile, 'r') as f:
+	data = f.read()
+records = data.split('----\n')
+R = []
+for record in records:
+	if "SampleID :" not in record:
+		continue
+	lines = record.strip().split('\n')
+	if len(lines) < 5:
+		continue
+	sname = lines[0].lstrip('SampleID :').strip()
+	if len(lines) == 5:
+		time, memory, _ = lines[-1].split('\t')
+		R.append([sname, time, memory])
+	else:
+		time, memory, _ = lines[-3].split('\t')
+		line_num = lines[-2].split(' ')[0].strip()
+		file_size = lines[-1].split(' ')[4]
+		R.append([sname, time, memory, line_num, file_size])
+
+if len(R[0]) == 3:
+	df = pd.DataFrame(R, columns=['SampleID', 'Time', 'Memory'])
+	df['allc_gz_size'] = df.SampleID.apply(lambda x: os.path.getsize(f"allc_files/{x}.allc.tsv.gz"))
+	df.rename(columns={'Time': 'gz_time', 'Memory': 'gz_memory'}, inplace=True)
+	df.to_csv("time_memory_usage_gz_version.txt", sep='\t', index=False)
+else:
+	df = pd.DataFrame(R, columns=['SampleID', 'time', 'memory', 'line_num', 'allc_size'])
+	df.to_csv("time_memory_usage_unzip_version.txt", sep='\t', index=False)
+```
+
+```python
+import os
+import pandas as pd
+
+df1 = pd.read_csv("test_result/time_memory_usage_gz_version.txt", sep='\t', index_col=0)
+df2 = pd.read_csv("test_result/time_memory_usage_unzip_version.txt", sep='\t', index_col=0)
+for col in df1.columns:
+	df2[col] = df2.index.to_series().map(df1[col].to_dict())
+df2['ballc_size'] = df2.index.to_series().apply(lambda x: os.path.getsize(f"ballc/{x}.ballc"))
+print("Average number of lines for *allc.tsv: %s in %s allc files" % (int(df2.line_num.mean()),df2.shape[0]))
+
+print("Average file size for *allc.tsv: %s MB" % ((df2.allc_size / 1024 /1024).mean()))
+print("Average reduce size for *allc.tsv: %s" % (((df2.allc_size - df2.ballc_size) / df2.allc_size).mean() * 100))
+print("Average time usage to convert allc.tsv to ballc: %s seconds" % (df2.time.mean()))
+print("Average peak memory usage to convert allc.tsv to ballc: %s MB" % (df2.memory.mean() / 1024))
+
+print("Average file size for *allc.tsv.gz: %s MB" % ((df2.allc_gz_size / 1024 /1024).mean()))
+print("Average reduce size for *allc.tsv.gz: %s" % (((df2.allc_gz_size - df2.ballc_size) / df2.allc_gz_size).mean() * 100))
+print("Average time usage to convert allc.tsv.gz to ballc: %s seconds" % (df2.gz_time.mean()))
+print("Average peak memory usage to convert allc.tsv.gz to ballc: %s MB" % (df2.gz_memory.mean() / 1024))
+```
+
+```text
+Average number of lines for *allc.tsv: 31431116 in 100 allc files
+
+Average file size for *allc.tsv: 798.9802947616577 MB
+Average reduce size for *allc.tsv: 93.14990172142411
+Average time usage to convert allc.tsv to ballc: 62.007799999999996 seconds
+Average peak memory usage to convert allc.tsv to ballc: 9.5697265625 MB
+
+Average file size for *allc.tsv.gz: 112.92901975631713 MB
+Average reduce size for *allc.tsv.gz: 51.620669455761316
+Average time usage to convert allc.tsv.gz to ballc: 62.9886 seconds
+Average peak memory usage to convert allc.tsv.gz to ballc: 9.6901953125 MB
+
+```
+
+### 4. merge
+```shell
+for file in `ls ballc`; do ballcools index ballc/${file}; done;
+
+find ballc -name *.ballc > ballc_path.txt
+/home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools merge -f ballc_path.txt merged.ballc
+```
+
+```text
+Merging finished.
+3194.22 1835176 99%
+53 minutes
+```
+
+### 5. Usage for non-single cell datasets
 #### Create meta index file
 ```shell
 mkdir Mammal40
