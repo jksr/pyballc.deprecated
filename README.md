@@ -380,41 +380,27 @@ Comprssed allc.tsv.gz
 vim run_a2b.sh
 ```shell
 mkdir -p ballc
-for allc in `find allc_files -name "*.allc.tsv.gz"`; do
+#find ../allc -name "*.allc.tsv.gz" > allc_path.txt 
+
+cat 1000_allc_path.txt | while read allc; do
   sname=$(basename ${allc})
   prefix=${sname/.allc.tsv.gz/}
   echo "SampleID" :${prefix}
-  /home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools a2b -a mm10_with_chrL_cmeta.txt.gz ${allc} ballc/${prefix}.ballc Ref/mm10_ucsc_with_chrL.chrom.sizes
+  /usr/bin/time -f "%e\t%M\t%P" ballcools a2b -a mm10_with_chrL_cmeta.txt.gz ${allc} ballc/${prefix}.ballc ~/Ref/mm10/mm10_ucsc_with_chrL.chrom.sizes
+  zcat ${allc} | wc -l
+  ls -l ${allc}
   echo "----"
 done;
 ```
 ```shell
 nohup bash run_a2b.sh > a2b.log &
-```
-
-vim run_a2b_unzip.sh
-```shell
-mkdir -p ballc
-for allc in `find allc_files -name "*.allc.tsv.gz"`; do
-  sname=$(basename ${allc})
-  prefix=${sname/.allc.tsv.gz/}
-  echo "SampleID" :${prefix}
-  gunzip ${allc}
-  /home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools a2b -a mm10_with_chrL_cmeta.txt.gz allc_files/${prefix}.allc.tsv ballc/${prefix}.ballc Ref/mm10_ucsc_with_chrL.chrom.sizes
-  wc -l allc_files/${prefix}.allc.tsv
-  ls -l allc_files/${prefix}.allc.tsv
-  echo "----"
-  rm -f allc_files/${prefix}.allc.tsv*
-done;
-
-nohup bash run_a2b_unzip.sh > a2b_unzip.log &
-```
+````
 
 ```python
 import os, sys
 import pandas as pd
 
-infile = "a2b_unzip.log"
+infile = "a2b.log"
 with open(infile, 'r') as f:
 	data = f.read()
 records = data.split('----\n')
@@ -442,59 +428,135 @@ if len(R[0]) == 3:
 	df.to_csv("time_memory_usage_gz_version.txt", sep='\t', index=False)
 else:
 	df = pd.DataFrame(R, columns=['SampleID', 'time', 'memory', 'line_num', 'allc_size'])
-	df.to_csv("time_memory_usage_unzip_version.txt", sep='\t', index=False)
+    df['ballc_size']=df.SampleID.apply(lambda x:os.path.getsize(f"ballc/{x}.ballc"))
+	df.to_csv("time_memory_usage.txt", sep='\t', index=False)
 ```
 
 ```python
 import os
 import pandas as pd
 
-df1 = pd.read_csv("test_result/time_memory_usage_gz_version.txt", sep='\t', index_col=0)
-df2 = pd.read_csv("test_result/time_memory_usage_unzip_version.txt", sep='\t', index_col=0)
-for col in df1.columns:
-	df2[col] = df2.index.to_series().map(df1[col].to_dict())
-df2['ballc_size'] = df2.index.to_series().apply(lambda x: os.path.getsize(f"ballc/{x}.ballc"))
-print("Average number of lines for *allc.tsv: %s in %s allc files" % (int(df2.line_num.mean()),df2.shape[0]))
+df = pd.read_csv("time_memory_usage.txt", sep='\t', index_col=0)
 
-print("Average file size for *allc.tsv: %s MB" % ((df2.allc_size / 1024 /1024).mean()))
-print("Average reduce size for *allc.tsv: %s" % (((df2.allc_size - df2.ballc_size) / df2.allc_size).mean() * 100))
-print("Average time usage to convert allc.tsv to ballc: %s seconds" % (df2.time.mean()))
-print("Average peak memory usage to convert allc.tsv to ballc: %s MB" % (df2.memory.mean() / 1024))
+print("1000 allc files:")
+print("Median number of lines for *allc.tsv: %s in %s allc files" % (int(df.line_num.median()),df.shape[0]))
+print("Median file size for *allc.tsv.gz: %s MB" % ((df.allc_size / 1024 /1024).median()))
+print("Median reduce size for *allc.tsv.gz: %s" % (((df.allc_size - df.ballc_size) / df.allc_size).median() * 100))
+print("Median time usage to convert allc.tsv.gz to ballc: %s seconds" % (df.time.median()))
+print("Median peak memory usage to convert allc.tsv.gz to ballc: %s MB" % (df.memory.median() / 1024))
 
-print("Average file size for *allc.tsv.gz: %s MB" % ((df2.allc_gz_size / 1024 /1024).mean()))
-print("Average reduce size for *allc.tsv.gz: %s" % (((df2.allc_gz_size - df2.ballc_size) / df2.allc_gz_size).mean() * 100))
-print("Average time usage to convert allc.tsv.gz to ballc: %s seconds" % (df2.gz_time.mean()))
-print("Average peak memory usage to convert allc.tsv.gz to ballc: %s MB" % (df2.gz_memory.mean() / 1024))
+df=df.sample(500)
+
 ```
 
 ```text
-Average number of lines for *allc.tsv: 31431116 in 100 allc files
+1000 allc files:
+Median number of lines for *allc.tsv: 33503256 in 1000 allc files
+Median file size for *allc.tsv.gz: 120.70244932174683 MB
+Median reduce size for *allc.tsv.gz: 51.671223148772924
+Median time usage to convert allc.tsv.gz to ballc: 51.905 seconds
+Median peak memory usage to convert allc.tsv.gz to ballc: 24.21875 MB
 
-Average file size for *allc.tsv: 798.9802947616577 MB
-Average reduce size for *allc.tsv: 93.14990172142411
-Average time usage to convert allc.tsv to ballc: 62.007799999999996 seconds
-Average peak memory usage to convert allc.tsv to ballc: 9.5697265625 MB
-
-Average file size for *allc.tsv.gz: 112.92901975631713 MB
-Average reduce size for *allc.tsv.gz: 51.620669455761316
-Average time usage to convert allc.tsv.gz to ballc: 62.9886 seconds
-Average peak memory usage to convert allc.tsv.gz to ballc: 9.6901953125 MB
 
 ```
 
-### 4. merge
+### 4. Merge (1 core, 20G memory)
+ballcools merge
 ```shell
 for file in `ls ballc`; do ballcools index ballc/${file}; done;
 
 find ballc -name *.ballc > ballc_path.txt
-/home/wding_salk_edu/miniconda3/envs/ballcools/bin/time -f "%e\t%M\t%P" ballcools merge -f ballc_path.txt merged.ballc
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f ballc_path.txt merged.ballc
+
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 500_ballc_path.txt 500_merged.ballc
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 100_ballc_path.txt 100_merged.ballc
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 50_ballc_path.txt 50_merged.ballc
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 10_ballc_path.txt 10_merged.ballc
+
+
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 750_ballc_path.txt 750_merged.ballc
+/usr/bin/time -f "%e\t%M\t%P" ballcools merge -f 250_ballc_path.txt 250_merged.ballc
+````
+
+```text
+Merging finished (1000 files)
+13952.71        16285288        59%
+3.88 h; 15.5GB memory
+
+
+Merging finished (750 files)
+11036.53        13327184        59%
+
+Merging finished (500 files)
+7878.89 8250068 63%
+
+Merging finished (250 files)
+4605.19 4265344 75%
+
+Merging finished (100 files)
+2282.19 1854276 98%
+
+Merging finished (50 files)
+1710.55 1022428 99%
+
+Merging finished (10 files)
+400.98  249280  99%
+```
+
+allcools merge
+```python
+import pandas as pd
+import os,sys
+df1=pd.read_csv("allc_path.txt",sep='\t',header=None,names=['path'])
+df1['SampleID']=df1.path.apply(lambda x:os.path.basename(x).rstrip('.allc.tsv.gz'))
+D=df1.set_index('SampleID').path.to_dict()
+outdir="allc_path"
+
+for file in os.listdir("ballc_path"):
+	df = pd.read_csv(os.path.join("ballc_path", file), sep='\t', header=None, names=['ballc_path'])
+	df['SampleID'] = df.ballc_path.apply(lambda x: os.path.basename(x).rstrip('.ballc'))
+	df['allc_path']=df.SampleID.map(D)
+	df.allc_path.to_csv(os.path.join(outdir,file.replace('ballc','allc')),sep='\t',index=False,header=False)
+```
+```shell
+# allcools merge 
+for no in "1000" "500" "100" "50" "10"; do
+  echo ${no}
+  /usr/bin/time -f "%e\t%M\t%P" allcools merge --cpu 20 --allc_paths allc_path/${no}_allc_path.txt --output_path ${no}_merged_allc.tsv.gz --chrom_size_path ~/Ref/mm10/mm10_ucsc.nochrM.sizes > ${no}.log 2>&1
+done;
 ```
 
 ```text
-Merging finished.
-3194.22 1835176 99%
-53 minutes
+merge finished (1000 files)
+24187.61        4629032 767%
+
+merge finished (500)
+12125.63        4344556 820%
+
+merge finished (100)
+2404.86 3844580 851%
+
+merge finished (50)
+1880.39 2742552 824%
+
+merge finished (10)
+521.13  1053168 792%
 ```
+
+| Number of Files | Tools     | No.CPU | Merge Time (Second) | Merge Time (Hour) | Memory Peak (KB) | Memory Peak (GB) |
+| --------------- | --------- | ------ | ------------------- | ----------------- | ---------------- | ---------------- |
+| 1000            | ballcools | 1      | 13952.71            | 3.875752778       | 16285288         | 15.5308609       |
+| 750             | ballcools | 1      | 11036.53            | 3.065702778       | 13327184         | 12.70979309      |
+| 500             | ballcools | 1      | 7878.89             | 2.188580556       | 8250068          | 7.86787796       |
+| 250             | ballcools | 1      | 4605.19             | 1.279219444       | 4265344          | 4.067749023      |
+| 100             | ballcools | 1      | 2282.19             | 0.633941667       | 1854276          | 1.768375397      |
+| 50              | ballcools | 1      | 1710.55             | 0.475152778       | 1022428          | 0.975063324      |
+| 10              | ballcools | 1      | 400.98              | 0.111383333       | 249280           | 0.237731934      |
+| 1000            | allcools  | 20     | 24187.61            | 6.718780556       | 4629032          | 4.414588928      |
+| 500             | allcools  | 20     | 12125.63            | 3.368230556       | 4344556          | 4.143291473      |
+| 100             | allcools  | 20     | 2404.86             | 0.668016667       | 3844580          | 3.666477203      |
+| 50              | allcools  | 20     | 1880.39             | 0.522330556       | 2742552          | 2.615501404      |
+| 10              | allcools  | 20     | 521.13              | 0.144758333       | 1053168          | 1.004379272      |
 
 ### 5. Usage for non-single cell datasets
 #### Create meta index file
