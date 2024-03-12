@@ -1,3 +1,29 @@
+> # Warming: This package is deprecated
+> This package relies on the 3rd party software SWIG to port C/C++ functions to python. On rare cases, the SWIG proting could give incorrect results when querying a ballc file. Unfortunatedly, it too complicated to solve this bug in a short time frame since SWIG is implicated. Therefore, we decide to make this implementation deprecated and we are working on a new version of pyballc which does not rely on SWIG. Please stay tuned and the new one will come soon.
+
+
+
+
+
+----------------------------
+----------------------------
+----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # pyballc
 
 [![PyPI version](https://badge.fury.io/py/pyballc.svg)](https://badge.fury.io/py/pyballc)
